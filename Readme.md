@@ -59,6 +59,12 @@ Include both pickle files (train/test datasets) in:
 - `image_size` : Number of pixels per dimension. They are assumed to be squared. Two possible values: `64 | 128`. default = `64`
 - `inference` : Boolean for choosing whether train or test. default = `False`
 
+## Inference
+python3 runtime.py \
+        --inference \
+        --pre_trained_disc=checkpoints/disc_200.pth \
+        --pre_trained_gen=checkpoints/gen_200.pth
+
 ## References
 If the code of this repository was useful for your research, please cite our work:
 

@@ -1,5 +1,5 @@
 from torch.utils.data import Dataset, DataLoader
-import cPickle as pickle
+import pickle
 import numpy as np
 from PIL import Image
 import torch
@@ -9,6 +9,7 @@ import scipy.io.wavfile as wavfile
 import string
 import random
 import unicodedata
+from string import printable #*
 
 printable = set(string.printable)
 
@@ -18,20 +19,20 @@ class dataset_builder(Dataset):
 
         # opening the file that contains the path with the images/audios.
         with open('config.yaml', 'r') as file:
-            config = yaml.load(file)
+            config = yaml.safe_load(file)
 
         # selecting the paths for the images/audios we will work with according to whether we are training or testing
         if not inference:
             self.faces = pickle.load(open(config['train_faces_path'], 'rb'))
             self.audios = pickle.load(open(config['train_audios_path'], 'rb'))
 
-            print 'Total amount of training samples: {0} faces | {1} audios '.format(len(self.faces),len(self.audios))
+            print('Total amount of training samples: {0} faces | {1} audios '.format(len(self.faces),len(self.audios)))
             print
         else:
             self.faces = pickle.load(open(config['inference_faces_path'], 'rb'))
             self.audios = pickle.load(open(config['inference_audios_path'], 'rb'))
 
-            print 'Total amount of inference samples: {0} faces | {1} audios '.format(len(self.faces),len(self.audios))
+            print('Total amount of inference samples: {0} faces | {1} audios '.format(len(self.faces),len(self.audios)))
             print
 
         # initializing some useful variables
@@ -56,7 +57,8 @@ class dataset_builder(Dataset):
 
         # getting audio paths.
         audio_path = self.audios[idx]
-        fm, wav_data = wavfile.read(filter(lambda x: x in printable, audio_path))
+        filtered_audio_path = ''.join(filter(lambda x: x in printable, audio_path))
+        fm, wav_data = wavfile.read(filtered_audio_path) #*
         if fm != 16000:
             raise ValueError('Sampling rate is expected to be 16kHz!')
 
@@ -71,9 +73,35 @@ class dataset_builder(Dataset):
         wav_data = self.pre_emphasize(wav_data)
 
         # opening the corresponding image and a wrong_face
-        cropped_face = Image.open(filter(lambda x: x in printable, format_path).replace('.jpg', '.png'))
+        # filtered_format_path = ''.join(filter(lambda x: x in printable, format_path))
+        # cropped_face = Image.open(filtered_format_path.replace('.jpg', '.png'))
+        # cropped_face = Image.open(''.join(filter(lambda x: x in printable, format_path)).replace('.jpg', '.png'))
+        # format_path = self.format_list[idx]
+        # print(f"Original format path: {format_path}")
+        
+        filtered_path = ''.join(filter(lambda x: x in printable, format_path))
+        image_path = filtered_path.replace('preprocessed_frame', 'cropped_face_frame').replace('.wav', '.png')
+        # print(f"Trying to open image: {image_path}")
+        
+        try:
+            cropped_face = Image.open(image_path)
+        except Exception as e:
+            # print(f"Failed to open image: {image_path}")
+            raise e
+
+        # Wrong face handling
         wrong_face_path = self.get_dismatched_face(audio_path)
-        wrong_face = Image.open(wrong_face_path)
+        # print(f"Original wrong face path: {wrong_face_path}")
+        
+        filtered_wrong_path = ''.join(filter(lambda x: x in printable, wrong_face_path))
+        wrong_face_image_path = filtered_wrong_path.replace('preprocessed_frame', 'cropped_face_frame').replace('.wav', '.png')
+        # print(f"Trying to open wrong face: {wrong_face_image_path}")
+        
+        try:
+            wrong_face = Image.open(wrong_face_image_path)
+        except Exception as e:
+            # print(f"Failed to open wrong face: {wrong_face_image_path}")
+            raise e
 
         # storing youtuber identity in a onehot vector. It will be usefull, for example, for softmax the loss computation
         youtuber = face_path.split('/')[-2]
@@ -107,9 +135,10 @@ class dataset_builder(Dataset):
 
     def format_filename(self, filename):
         try:
-            filename = filename.decode('utf-8')
-            s = ''.join((c for c in unicodedata.normalize('NFD', unicode(filename)) if unicodedata.category(c) != 'Mn'))
-            return s.decode()
+            # filename = filename.decode('utf-8')
+            s = ''.join((c for c in unicodedata.normalize('NFD', str(filename)) if unicodedata.category(c) != 'Mn'))
+
+            return s
         except (UnicodeEncodeError, UnicodeDecodeError):
             return filename
 

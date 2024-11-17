@@ -1,7 +1,7 @@
 # training pickle files path:
-train_faces_path: 
-train_audios_path: 
+train_faces_path: /home/iec/DucBinh/wav2pix_python3/dataset/pickle/faces/train.pkl
+train_audios_path: /home/iec/DucBinh/wav2pix_python3/dataset/pickle/audios/train.pkl
 
 # inference pickle files path:
-inference_faces_path: 
-inference_audios_path: 
+inference_faces_path: /home/iec/DucBinh/wav2pix_python3/dataset/pickle/faces/test.pkl
+inference_audios_path: /home/iec/DucBinh/wav2pix_python3/dataset/pickle/audios/test.pkl
