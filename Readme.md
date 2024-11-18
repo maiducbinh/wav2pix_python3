@@ -21,13 +21,17 @@ Although having initially trained with 10 different identities, we can only publ
 
 If you want to create your own dataset, it works as follows:  
 
-- Run `get_data.py`. It requires the path of a .csv file with the following information: the youtube url `Channel-URL`, the name of the youtuber `Name` and the gender `Gender`. The output dataset will consist on a folder for each different youtuber specified in the .csv file as well as two folders (video/audio) in each of them containing the full video/audio downloaded.  
+- Run `get_data.py`. It requires the path of a .csv file with the following information: the youtube url `Channel-URL`, the name of the youtuber `Name` and the gender `Gender`. The output dataset will consist on a folder for each different youtuber specified in the .csv file as well as two folders (video/audio) in each of them containing the full video/audio downloaded. 
+python scripts/data_generator/get_data.py -url_csv 'scripts/data_generator/a.csv' -dataset_path 'd
+ataset/train'
 
 - Run `preprocess_audio_frames.py` for audio preprocessing purposes.
+python scripts/data_generator/preprocess_audio_frames.py -dataset_path 'dataset1/train'
 
 - Remove any file whose name does not finish like `preprocessing_wav` in each audio folder.  
 
 - Run `face_detector.py` specifying the dataset path, a confidence threshold needed to compute the bounding boxes and the path of the haarcascade pretrained classifier (included in this repo in `/assets`)
+python scripts/data_generator/face_detector.py -dataset_path 'dataset1/train' -confidence_thresh 2 -haarcascade_path /home/iec/DucBinh/wav2pix_python3/assets/haarcascade_frontalface_default.xml
 
 - The useful audio snippets will be stored in `DATASET-PATH/audio/NAME-OF-THE-DOWNLOADED-VIDEO_frames`. The useful youtuber faces will be stored in `DATASET-PATH/video/NAME-OF-THE-DOWNLOADED-VIDEO_cropped_frames`  
 
@@ -64,6 +68,8 @@ python3 runtime.py \
         --inference \
         --pre_trained_disc=checkpoints/disc_200.pth \
         --pre_trained_gen=checkpoints/gen_200.pth
+
+python -m visdom.server
 
 ## References
 If the code of this repository was useful for your research, please cite our work:

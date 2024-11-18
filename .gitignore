@@ -1,2 +1,7 @@
 config.yaml
 checkpoints/
+dataset1/
+scripts/data_generator/a.csv
+scripts/data_generator/cookie.txt
+results/*
+

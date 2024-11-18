@@ -1,8 +1,8 @@
 import csv
-import youtube_dl as yt
 import argparse
 import os
 import shutil
+import yt_dlp as yt
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-url_csv", required=True,
@@ -14,6 +14,7 @@ args = parser.parse_args()
 
 def read_channels(file_path):
 
+    
     parsed_channels = []
     with open(file_path) as csvfile:
         reader = csv.DictReader(csvfile)
@@ -29,7 +30,7 @@ def download(url_list):
 
     for url in url_list:
         count += 1
-        print "Downloading videos and audios {}/{} with url [{}] from {}".format(count, len(url_list), url['url'], url['name'])
+        print("Downloading videos and audios {}/{} with url [{}] from {}".format(count, len(url_list), url['url'], url['name']))
         out_path = os.path.join(args.dataset_path, url['name'])
         video_out_path = os.path.join(out_path, 'video')
         audio_out_path = os.path.join(out_path, 'audio')
@@ -40,23 +41,24 @@ def download(url_list):
 
         try:
             video_options = {
-                'format': "135, 140",
-                'verbose': True,
-                'continuedl': True,
-                'ignoreerrors': True,
-                'nooverwrites': True,
-                'sleep_interval': 5,
-                'playliststart': 1,
-                'playlistend': 15,
-
+                "format": "135, 140",
+                "verbose": True,
+                "continuedl": True,
+                "ignoreerrors": True,
+                "nooverwrites": True,
+                "sleep_interval": 5,
+                "playliststart": 1,
+                "playlistend": 15,
+                'cookiefile': 'cookie.txt'                
             }
+
 
             with yt.YoutubeDL(video_options) as video_ydl:
                 video_ydl.download([url['url']])
 
 
         except Exception:
-            print "Download error."
+            print("Download error.")
             error_counter += 1
 
 
@@ -67,7 +69,8 @@ def download(url_list):
                 shutil.move(files, video_out_path)
             elif files.endswith(".m4a"):
                 shutil.move(files, audio_out_path)
-    print "Found {} errors".format(error_counter)
+    print("Found {} errors".format(error_counter))
+
 
 
 urls = read_channels(args.url_csv)
